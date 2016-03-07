@@ -10,7 +10,7 @@ source /etc/os-release
 case "$NAME" in
 	SLES|SLED)
 		package_manager=zypper;;
-	"Red Hat "*)
+	"Red Hat "*|"CentOS"*)
 		package_manager=yum;;
 	Fedora)
 		package_manager=dnf;;
