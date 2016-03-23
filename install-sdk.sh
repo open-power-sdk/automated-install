@@ -6,6 +6,8 @@
 # http://www.eclipse.org/legal/epl-v10.html
 ###############################################################################
 
+[[ "$(id -u)" != 0 ]] && echo "This script must be run with root priviledges." && exit 1
+
 source /etc/os-release
 case "$NAME" in
 	SLES|SLED)
