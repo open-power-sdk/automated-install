@@ -9,14 +9,14 @@
 [[ "$(id -u)" != 0 ]] && echo "This script must be run with root priviledges." && exit 1
 
 source /etc/os-release
-case "$NAME" in
-	SLES|SLED)
+case "$ID" in
+	sles|sled)
 		package_manager=zypper;;
-	"Red Hat "*|"CentOS"*)
+	rhel|centos)
 		package_manager=yum;;
-	Fedora)
+	fedora)
 		package_manager=dnf;;
-	Ubuntu)
+	ubuntu)
 		package_manager=apt-get;;
 	*)
 		echo unsupported operating system
