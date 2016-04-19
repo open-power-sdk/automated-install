@@ -50,7 +50,7 @@ function download2pipe {
 case "$package_manager" in
 	yum|zypper|dnf)
 		if ! rpm -q ibm-power-repo >/dev/null; then
-			REPORPM=ibm-power-repo-3.0.0-8.noarch.rpm
+			REPORPM=ibm-power-repo-latest.noarch.rpm
 			download ftp://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/$REPORPM \
 				|| { echo "Download of IBM Power Tools Repository configuration RPM failed."; exit 1; }
 			$package_manager install ./$REPORPM
@@ -76,7 +76,7 @@ case "$package_manager" in
 		AT_RELEASES="$(download2pipe $REPO_URI/dists/trusty/Release | sed '/Components/s/^Components: \(.*\)$/\1/;tcontinue;d;:continue')"
 		apt-add-repository "deb$arch $REPO_URI trusty $AT_RELEASES"
 
-		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/v1.8.0/packages/deb/repo
+		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/packages/deb/repo
 
 		# apt-key add F20E8D79.gpg.key
 		key="$(download2pipe $REPO_URI/dists/trusty/F20E8D79.gpg.key)"
@@ -87,7 +87,7 @@ case "$package_manager" in
 		if [ "$(uname -p)" = x86_64 ]; then
 			arch=' [arch=amd64]'
 		fi
-		apt-add-repository "deb$arch $REPO_URI trusty sdk-1.8"
+		apt-add-repository "deb$arch $REPO_URI trusty sdk"
 
 		apt-get update
 		;;
