@@ -116,10 +116,10 @@ case "$package_manager" in
 		AT_RELEASES="$(download2pipe $REPO_URI/dists/trusty/Release | sed '/Components/s/^Components: \(.*\)$/\1/;tcontinue;d;:continue')"
 		apt-add-repository "deb$arch $REPO_URI trusty $AT_RELEASES"
 
-		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/packages/deb/repo
+		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/latest/packages/deb/repo
 
-		# apt-key add F20E8D79.gpg.key
-		key="$(download2pipe $REPO_URI/dists/trusty/F20E8D79.gpg.key)"
+		# apt-key add B346CA20.gpg.key
+		key="$(download2pipe $REPO_URI/dists/trusty/B346CA20.gpg.key)"
 		if [ $? -eq 0 ]; then
 			echo "$key" | apt-key add -
 		fi
