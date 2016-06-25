@@ -137,4 +137,39 @@ case "$package_manager" in
 		;;
 esac
 
+# enable XL compiler repo
+arch=$(uname -p)
+if [ "$arch" = ppc64le ]; then
+	XL_REPO_ROOT=http://public.dhe.ibm.com/software/server/POWER/Linux/xl-compiler/eval/$arch
+	case "$ID" in
+		sles|sled)
+			# make sure it's 12!
+			if [[ ${VERSION_ID%%.*} == 12 ]]; then
+				zypper addrepo -c $XL_REPO_ROOT/sles12/ ibm-xl-compiler-eval
+				zypper refresh
+			fi
+			;;
+		rhel|centos)
+			# make sure it's 7
+			if [[ ${VERSION_ID%%.*} == 7 ]]; then
+				download $XL_REPO_ROOT/rhel7/repodata/repomd.xml.key
+				rpm --import repomd.xml.key
+				rm -f repomd.xml.key
+				download2pipe $XL_REPO_ROOT/rhel7/ibm-xl-compiler-eval.repo > /etc/yum.repos.d/ibm-xl-compiler-eval.repo
+			fi
+			;;
+		fedora)
+			download $XL_REPO_ROOT/rhel7/repodata/repomd.xml.key
+			rpm --import repomd.xml.key
+			rm -f repomd.xml.key
+			download2pipe $XL_REPO_ROOT/rhel7/ibm-xl-compiler-eval.repo > /etc/yum.repos.d/ibm-xl-compiler-eval.repo
+			;;
+		ubuntu)
+			download2pipe $XL_REPO_ROOT/ubuntu/public.gpg | apt-key add -
+			apt-add-repository "deb $XL_REPO_ROOT/ubuntu/ trusty main"
+			sudo apt-get update
+			;;
+	esac
+fi
+
 $package_manager install ibm-sdk-lop
