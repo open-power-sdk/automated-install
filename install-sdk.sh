@@ -100,26 +100,25 @@ case "$package_manager" in
 		fi
 		;;
 	apt-get)
+		if [ -r /etc/lsb-release ]; then
+			source /etc/lsb-release
+			CODENAME=$DISTRIB_CODENAME
+		fi
+		if [ -r /etc/os-release ]; then
+			source /etc/lsb-release
+			CODENAME=$UBUNTU_CODENAME
+		fi
+		if [ "$CODENAME" = "" ]; then
+			echo "I am unable to determine your release name, which I need to retrieve keys and set up the repositories."
+			exit 1
+		fi
+
 		apt-get install software-properties-common # for apt-add-repository
 
 		REPO_URI=ftp://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu
 
 		# apt-key add 6976a827.gpg.key
-		key="$(download2pipe $REPO_URI/dists/trusty/6976a827.gpg.key)"
-		if [ $? -eq 0 ]; then
-			echo "$key" | apt-key add -
-		fi
-
-		if [ "$(uname -p)" = x86_64 ]; then
-			arch=' [arch=i386]'
-		fi
-		AT_RELEASES="$(download2pipe $REPO_URI/dists/trusty/Release | sed '/Components/s/^Components: \(.*\)$/\1/;tcontinue;d;:continue')"
-		apt-add-repository "deb$arch $REPO_URI trusty $AT_RELEASES"
-
-		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/latest/packages/deb/repo
-
-		# apt-key add B346CA20.gpg.key
-		key="$(download2pipe $REPO_URI/dists/trusty/B346CA20.gpg.key)"
+		key="$(download2pipe $REPO_URI/dists/$CODENAME/6976a827.gpg.key)"
 		if [ $? -eq 0 ]; then
 			echo "$key" | apt-key add -
 		fi
@@ -127,7 +126,21 @@ case "$package_manager" in
 		if [ "$(uname -p)" = x86_64 ]; then
 			arch=' [arch=amd64]'
 		fi
-		apt-add-repository "deb$arch $REPO_URI trusty sdk"
+		AT_RELEASES="$(download2pipe $REPO_URI/dists/$CODENAME/Release | sed '/Components/s/^Components: \(.*\)$/\1/;tcontinue;d;:continue')"
+		apt-add-repository "deb$arch $REPO_URI $CODENAME $AT_RELEASES"
+
+		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/latest/packages/deb/repo
+
+		# apt-key add B346CA20.gpg.key
+		key="$(download2pipe $REPO_URI/dists/$CODENAME/B346CA20.gpg.key)"
+		if [ $? -eq 0 ]; then
+			echo "$key" | apt-key add -
+		fi
+
+		if [ "$(uname -p)" = x86_64 ]; then
+			arch=' [arch=amd64]'
+		fi
+		apt-add-repository "deb$arch $REPO_URI $CODENAME sdk"
 
 		apt-get update
 		;;
@@ -166,7 +179,7 @@ if [ "$arch" = ppc64le ]; then
 			;;
 		ubuntu)
 			download2pipe $XL_REPO_ROOT/ubuntu/public.gpg | apt-key add -
-			apt-add-repository "deb $XL_REPO_ROOT/ubuntu/ trusty main"
+			apt-add-repository "deb $XL_REPO_ROOT/ubuntu/ $CODENAME main"
 			sudo apt-get update
 			;;
 	esac
