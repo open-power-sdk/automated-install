@@ -1,3 +1,5 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0b7cd13807d34db5af06a762037e75da)](https://www.codacy.com/app/rpsene/automated-install?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=open-power-sdk/automated-install&amp;utm_campaign=Badge_Grade)
+
 # Project Description
 This script automates the installation of the IBM SDK for Linux on Power, including all its dependencies.
 
