@@ -1,5 +1,5 @@
 # Project Description
-This scripts helps on the installation of the IBM SDK for Linux on Power, including all its dependencies.
+This script automates the installation of the IBM SDK for Linux on Power, including all its dependencies.
 
 ## Contributing to the project
 We welcome contributions to the Power Functional Simulator Setup Project in many forms. There's always plenty to do! Full details of how to contribute to this project are documented in the
