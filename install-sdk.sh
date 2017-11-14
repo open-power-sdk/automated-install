@@ -103,14 +103,16 @@ case "$package_manager" in
 		fi
 		;;
 	apt-get)
-		if [ -r /etc/lsb-release ]; then
-			source /etc/lsb-release
-			CODENAME=$DISTRIB_CODENAME
+		if [ -z "$VERSION_CODENAME" ]; then
+			if [ -z "$UBUNTU_CODENAME" ]; then
+				if [ -r /etc/lsb-release ]; then
+					source /etc/lsb-release
+					UBUNTU_CODENAME="$DISTRIB_CODENAME"
+				fi
+			fi
+			VERSION_CODENAME="$UBUNTU_CODENAME"
 		fi
-		if [ -r /etc/os-release ]; then
-			source /etc/lsb-release
-			CODENAME=$UBUNTU_CODENAME
-		fi
+		CODENAME="$VERSION_CODENAME"
 		if [ "$CODENAME" = "" ]; then
 			echo "I am unable to determine your release name, which I need to retrieve keys and set up the repositories."
 			exit 1
