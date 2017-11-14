@@ -73,23 +73,6 @@ function download2pipe {
 	$GET2PIPE $@
 }
 
-# show the command to install IBM XL C/C++ for Linux, V13.1.4, Community Edition
-function install_yum_distros {
-	echo
-	echo "To install IBM XL C/C++ for Linux, V13.1.4, Community Edition, issue the following commands:"
-	echo
-	echo "	sudo $package_manager install xlc.13.1.4 xlc-license-community.13.1.4 --exclude xlc-license-eval.13.1.4"
-	echo "	sudo /opt/ibm/xlC/13.1.4/bin/xlc_configure"
-}
-
-function install_apt_distros {
-	echo
-        echo "To install IBM XL C/C++ for Linux, V13.1.4, Community Edition, issue the following commands:"
-        echo
-        echo "  sudo $package_manager install xlc.13.1.4 xlc-license-community.13.1.4"
-        echo "  sudo /opt/ibm/xlC/13.1.4/bin/xlc_configure"
-}
-
 case "$package_manager" in
 	yum|zypper|dnf)
 		if ! rpm -q ibm-power-repo >/dev/null; then
@@ -190,14 +173,13 @@ fi
 
 $package_manager install ibm-sdk-lop
 
-case "$ID" in
-	sles|sled|ubuntu)
-		install_apt_distros
-		;;
-	rhel|centos|fedora)
-		install_yum_distros
-		;;
-	*)
-		echo unsupported operating system
-		exit 1;;
-esac
+echo
+echo "Installation of IBM Software Development Kit for Linux on Power complete!"
+
+if [ "$arch" = ppc64le ]; then
+	echo
+	echo "To install IBM XL C/C++ for Linux Community Edition, issue the following commands:"
+	echo
+	echo -e "\t/usr/bin/sudo $package_manager install xlc"
+	echo -e "\t/usr/bin/sudo /opt/ibm/xlC/__version__/bin/xlc_configure"
+fi
