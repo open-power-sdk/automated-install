@@ -42,7 +42,7 @@ case "$ID" in
 		package_manager=yum;;
 	fedora)
 		package_manager=dnf;;
-	ubuntu)
+	ubuntu|debian)
 		package_manager=apt-get;;
 	*)
 		echo unsupported operating system
@@ -91,6 +91,11 @@ case "$package_manager" in
 				if [ -r /etc/lsb-release ]; then
 					source /etc/lsb-release
 					UBUNTU_CODENAME="$DISTRIB_CODENAME"
+				elif [ "$ID" = debian ]; then
+					case "$VERSION_ID" in
+						8) UBUNTU_CODENAME=trusty;;
+						9) UBUNTU_CODENAME=xenial;;
+					esac
 				fi
 			fi
 			VERSION_CODENAME="$UBUNTU_CODENAME"
@@ -165,7 +170,7 @@ if [ "$arch" = ppc64le ]; then
 			rm -f repomd.xml.key
 			download2pipe $XL_REPO_ROOT/rhel7/ibm-xl-compiler-eval.repo > /etc/yum.repos.d/ibm-xl-compiler-eval.repo
 			;;
-		ubuntu)
+		ubuntu|debian)
 			download2pipe $XL_REPO_ROOT/ubuntu/public.gpg | apt-key add -
 			apt-add-repository "deb $XL_REPO_ROOT/ubuntu/ $CODENAME main"
 			sudo apt-get update
