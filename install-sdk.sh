@@ -1,7 +1,7 @@
 #!/bin/bash
 : '
 
-Copyright (C) 2017 IBM Corporation
+Copyright (C) 2018 IBM Corporation
 
 Licensed under the Apache License, Version 2.0 (the “License”);
 you may not use this file except in compliance with the License.
@@ -19,11 +19,30 @@ limitations under the License.
 		* Paul Clarke <pacman@us.ibm.com>
 '
 
+function help () {
+	cat <<EOF
+Usage: $0 [--yes|-y] [--quiet] [--repos-only]
+
+This script configures software repositories and can install the
+IBM SDK for Linux on Power (https://developer.ibm.com/linuxonpower/sdk/).
+
+  --yes
+  -y            Proceed with installation without a prompt to proceed.
+
+  --quiet       Suppress progress output from commands being executed.
+
+  --repos-only  Configure the software repository and exit without installing
+                the SDK.  To install the SDK afterwards, use the system
+                package management command to install "ibm-sdk-lop".
+EOF
+}
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 		"-y"|"--yes") PROCEED=yes;;
 		"--repos-only") REPOS_ONLY=yes;;
 		"--quiet") QUIET="yes";;
+		"--help"|"-h"|'-?') help; exit 0;;
 	esac
 	shift
 done
