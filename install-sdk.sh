@@ -144,7 +144,7 @@ case "$package_manager" in
 esac
 
 # enable XL compiler repo
-arch=$(uname -p)
+arch=$(uname -m)
 if [ "$arch" = ppc64le ]; then
 	XL_REPO_ROOT=http://public.dhe.ibm.com/software/server/POWER/Linux/xl-compiler/eval/$arch
 	case "$ID" in
