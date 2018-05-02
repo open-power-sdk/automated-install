@@ -19,19 +19,22 @@ limitations under the License.
 		* Paul Clarke <pacman@us.ibm.com>
 '
 
-echo
-echo "Installation of IBM Software Development Kit for Linux on Power"
-echo
-
-[[ "$(id -u)" != 0 ]] && echo "This script must be run with root priviledges." && exit 1
-
 while [ $# -gt 0 ]; do
 	case "$1" in
 		"-y"|"--yes") PROCEED=yes;;
 		"--repos-only") REPOS_ONLY=yes;;
+		"--quiet") QUIET="yes";;
 	esac
 	shift
 done
+
+if [ "$QUIET" != "yes" ]; then
+	echo
+	echo "Installation of IBM Software Development Kit for Linux on Power"
+	echo
+fi
+
+[[ "$(id -u)" != 0 ]] && echo "This script must be run with root priviledges." && exit 1
 
 if [ "$PROCEED" != "yes" ]; then
 	echo "This script will configure and enable new software repositories on this system, and install the IBM SDK for Linux on Power."
@@ -42,16 +45,23 @@ if [ "$PROCEED" != "yes" ]; then
 	fi
 fi
 
+if [ "$QUIET" = "yes" ]; then
+	package_manager_quiet="--quiet"
+fi
+
 source /etc/os-release
 case "$ID" in
 	sles|sled)
-		package_manager=zypper;;
+		package_manager="zypper $package_manager_quiet";;
 	rhel|centos)
-		package_manager=yum;;
+		package_manager="yum $package_manager_quiet";;
 	fedora)
-		package_manager=dnf;;
+		package_manager="dnf $package_manager_quiet";;
 	ubuntu|debian)
-		package_manager=apt-get;;
+		if [ "$QUIET" = "yes" ]; then
+			package_manager_quiet="--quiet --quiet"
+		fi
+		package_manager="apt-get $package_manager_quiet";;
 	*)
 		echo unsupported operating system
 		exit 1;;
@@ -60,11 +70,17 @@ esac
 GET=""
 GET2PIPE=""
 if which curl >/dev/null; then
-	GET="curl -O"
-	GET2PIPE="curl"
+	if [ "$QUIET" = "yes" ]; then
+		GETQUIET="--silent"
+	fi
+	GET="curl $GETQUIET -O"
+	GET2PIPE="curl $GETQUIET"
 elif which wget >/dev/null; then
-	GET="wget"
-	GET2PIPE="wget -O-"
+	if [ "$QUIET" = "yes" ]; then
+		GETQUIET="--quiet"
+	fi
+	GET="wget $GETQUIET"
+	GET2PIPE="wget $GETQUIET -O-"
 fi
 
 function download {
@@ -82,7 +98,7 @@ function download2pipe {
 }
 
 case "$package_manager" in
-	yum|zypper|dnf)
+	yum*|zypper*|dnf*)
 		if ! rpm -q ibm-power-repo >/dev/null; then
 			REPORPM=ibm-power-repo-latest.noarch.rpm
 			download ftp://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/$REPORPM \
@@ -93,7 +109,7 @@ case "$package_manager" in
 			/opt/ibm/lop/configure
 		fi
 		;;
-	apt-get)
+	apt-get*)
 		if [ -z "$VERSION_CODENAME" ]; then
 			if [ -z "$UBUNTU_CODENAME" ]; then
 				if [ -r /etc/lsb-release ]; then
@@ -114,7 +130,7 @@ case "$package_manager" in
 			exit 1
 		fi
 
-		apt-get install software-properties-common # for apt-add-repository
+		$package_manager install software-properties-common # for apt-add-repository
 
 		REPO_URI=ftp://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu
 
@@ -143,7 +159,7 @@ case "$package_manager" in
 		fi
 		apt-add-repository "deb$arch $REPO_URI $CODENAME sdk"
 
-		apt-get update
+		$package_manager update
 		;;
 	*)
 		echo "I don't know how to set up your package management system.  Please refer to https://www-304.ibm.com/support/customercare/sas/f/lopdiags/home.html."
@@ -160,7 +176,7 @@ if [ "$arch" = ppc64le ]; then
 			# make sure it's 12!
 			if [[ ${VERSION_ID%%.*} == 12 ]]; then
 				zypper addrepo -c $XL_REPO_ROOT/sles12/ ibm-xl-compiler-eval
-				zypper refresh
+				$package_manager refresh
 			fi
 			;;
 		rhel|centos)
@@ -179,9 +195,12 @@ if [ "$arch" = ppc64le ]; then
 			download2pipe $XL_REPO_ROOT/rhel7/ibm-xl-compiler-eval.repo > /etc/yum.repos.d/ibm-xl-compiler-eval.repo
 			;;
 		ubuntu|debian)
-			download2pipe $XL_REPO_ROOT/ubuntu/public.gpg | apt-key add -
+			key="$(download2pipe $XL_REPO_ROOT/ubuntu/public.gpg)"
+			if [ $? -eq 0 ]; then
+				echo "$key" | apt-key add -
+			fi
 			apt-add-repository "deb $XL_REPO_ROOT/ubuntu/ $CODENAME main"
-			sudo apt-get update
+			sudo $package_manager update
 			;;
 	esac
 fi
@@ -193,7 +212,7 @@ if [ "$REPOS_ONLY" != yes ]; then
 	echo "Installation of IBM Software Development Kit for Linux on Power complete!"
 fi
 
-if [ "$arch" = ppc64le ]; then
+if [ "$arch" = ppc64le -a "$QUIET" != yes ]; then
 	echo
 	echo "To install IBM XL C/C++ for Linux Community Edition, issue the following commands:"
 	echo
