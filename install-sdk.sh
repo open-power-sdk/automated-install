@@ -25,7 +25,15 @@ echo
 
 [[ "$(id -u)" != 0 ]] && echo "This script must be run with root priviledges." && exit 1
 
-if [[ ! ( "$1" == "--yes" || "$1" == "-y" ) ]]; then
+while [ $# -gt 0 ]; do
+	case "$1" in
+		"-y"|"--yes") PROCEED=yes;;
+		"--repos-only") REPOS_ONLY=yes;;
+	esac
+	shift
+done
+
+if [ "$PROCEED" != "yes" ]; then
 	echo "This script will configure and enable new software repositories on this system, and install the IBM SDK for Linux on Power."
 	read -N 1 -p 'Proceed? (y/N) ' p
 	echo
@@ -178,10 +186,12 @@ if [ "$arch" = ppc64le ]; then
 	esac
 fi
 
-$package_manager install ibm-sdk-lop
+if [ "$REPOS_ONLY" != yes ]; then
+	$package_manager install ibm-sdk-lop
 
-echo
-echo "Installation of IBM Software Development Kit for Linux on Power complete!"
+	echo
+	echo "Installation of IBM Software Development Kit for Linux on Power complete!"
+fi
 
 if [ "$arch" = ppc64le ]; then
 	echo
