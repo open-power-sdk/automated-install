@@ -1,6 +1,6 @@
 ### Welcome
 
-We welcome contributions to the Power Functional Simulator Setup Project in many forms, and there's always plenty to do!
+We welcome contributions to the OpenPower SDK Automated Install in many forms, and there's always plenty to do!
 
 First things first, please review the Power Simulator Project's [Code of Conduct](https://github.com/hyperledger/hyperledger/wiki/Hyperledger-Project-Code-of-Conduct) before participating. It is important that we keep things civil.
 

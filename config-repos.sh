@@ -21,26 +21,21 @@ limitations under the License.
 
 function help () {
 	cat <<EOF
-Usage: $0 [--yes|-y] [--quiet] [--repos-only]
+Usage: $0 [--yes|-y] [--quiet]
 
-This script configures software repositories and can install the
-IBM SDK for Linux on Power (https://developer.ibm.com/linuxonpower/sdk/).
+This script configures the OpenPower SDK software repositories.
+See https://developer.ibm.com/linuxonpower/sdk/ for more information.
 
   --yes
-  -y            Proceed with installation without a prompt to proceed.
+  -y            Proceed with configuration without a prompt to proceed.
 
   --quiet       Suppress progress output from commands being executed.
-
-  --repos-only  Configure the software repository and exit without installing
-                the SDK.  To install the SDK afterwards, use the system
-                package management command to install "ibm-sdk-lop".
 EOF
 }
 
 while [ $# -gt 0 ]; do
 	case "$1" in
 		"-y"|"--yes") PROCEED=yes;;
-		"--repos-only") REPOS_ONLY=yes;;
 		"--quiet") QUIET="yes";;
 		"--help"|"-h"|'-?') help; exit 0;;
 	esac
@@ -49,14 +44,14 @@ done
 
 if [ "$QUIET" != "yes" ]; then
 	echo
-	echo "Installation of IBM Software Development Kit for Linux on Power"
+	echo "Configuration of OpenPower SDK software repositories."
 	echo
 fi
 
 [[ "$(id -u)" != 0 ]] && echo "This script must be run with root priviledges." && exit 1
 
 if [ "$PROCEED" != "yes" ]; then
-	echo "This script will configure and enable new software repositories on this system, and install the IBM SDK for Linux on Power."
+	echo "This script will configure and enable new software repositories on this system."
 	read -N 1 -p 'Proceed? (y/N) ' p
 	echo
 	if [[ ! ( "$p" =~ [yY] ) ]]; then
@@ -77,10 +72,14 @@ case "$ID" in
 	fedora)
 		package_manager="dnf $package_manager_quiet";;
 	ubuntu|debian)
+		package_manager="apt-get"
 		if [ "$QUIET" = "yes" ]; then
-			package_manager_quiet="--quiet --quiet"
+			package_manager="$package_manager --quiet --quiet"
 		fi
-		package_manager="apt-get $package_manager_quiet";;
+		if [ "$PROCEED" = "yes" ]; then
+			package_manager="$package_manager --yes"
+		fi
+		;;
 	*)
 		echo unsupported operating system
 		exit 1;;
@@ -149,35 +148,47 @@ case "$package_manager" in
 			exit 1
 		fi
 
+		if [ "$QUIET" != "yes" ]; then echo "Install sofware-properties-common..."; fi
 		$package_manager install software-properties-common # for apt-add-repository
 
 		REPO_URI=ftp://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu
 
-		# apt-key add 6976a827.gpg.key
+		if [ "$QUIET" != "yes" ]; then echo "Download $REPO_URI/dists/$CODENAME/6976a827.gpg.key..."; fi
 		key="$(download2pipe $REPO_URI/dists/$CODENAME/6976a827.gpg.key)"
 		if [ $? -eq 0 ]; then
+			if [ "$QUIET" != "yes" ]; then echo "Add key 6976a827..."; fi
 			echo "$key" | apt-key add -
+		else
+			echo "Download key 6976a827 FAILed!"
+			exit 1
 		fi
 
 		if [ "$(uname -p)" = x86_64 ]; then
 			arch=' [arch=amd64]'
 		fi
 		AT_RELEASES="$(download2pipe $REPO_URI/dists/$CODENAME/Release | sed '/Components/s/^Components: \(.*\)$/\1/;tcontinue;d;:continue')"
+		if [ "$QUIET" != "yes" ]; then echo "Add repository \"deb$arch $REPO_URI $CODENAME $AT_RELEASES\""; fi
 		apt-add-repository "deb$arch $REPO_URI $CODENAME $AT_RELEASES"
 
 		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/latest/packages/deb/repo
 
-		# apt-key add B346CA20.gpg.key
+		if [ "$QUIET" != "yes" ]; then echo "Download $REPO_URI/dists/$CODENAME/B346CA20.gpg.key..."; fi
 		key="$(download2pipe $REPO_URI/dists/$CODENAME/B346CA20.gpg.key)"
 		if [ $? -eq 0 ]; then
+			if [ "$QUIET" != "yes" ]; then echo "Add key B346CA20..."; fi
 			echo "$key" | apt-key add -
+		else
+			echo "Download FAILed!"
+			exit 1
 		fi
 
 		if [ "$(uname -p)" = x86_64 ]; then
 			arch=' [arch=amd64]'
 		fi
+		if [ "$QUIET" != "yes" ]; then echo "Add repository \"deb$arch $REPO_URI $CODENAME sdk\""; fi
 		apt-add-repository "deb$arch $REPO_URI $CODENAME sdk"
 
+		if [ "$QUIET" != "yes" ]; then echo "Update repositories information..."; fi
 		$package_manager update
 		;;
 	*)
@@ -224,17 +235,14 @@ if [ "$arch" = ppc64le ]; then
 	esac
 fi
 
-if [ "$REPOS_ONLY" != yes ]; then
-	$package_manager install ibm-sdk-lop
-
-	echo
-	echo "Installation of IBM Software Development Kit for Linux on Power complete!"
-fi
-
 if [ "$arch" = ppc64le -a "$QUIET" != yes ]; then
 	echo
 	echo "To install IBM XL C/C++ for Linux Community Edition, issue the following commands:"
 	echo
 	echo -e "\t/usr/bin/sudo $package_manager install xlc"
 	echo -e "\t/usr/bin/sudo /opt/ibm/xlC/__version__/bin/xlc_configure"
+fi
+
+if [ "$QUIET" != "yes" ]; then
+	echo "Configuration of OpenPower SDK software repositories is complete!"
 fi
