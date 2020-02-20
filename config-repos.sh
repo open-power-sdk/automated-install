@@ -211,7 +211,7 @@ if [ "$arch" = ppc64le ]; then
 			;;
 		rhel|centos)
 			# make sure it's 7
-			if [[ ${VERSION_ID%%.*} == 7 ]]; then
+			if [[ ${VERSION_ID%%.*} -ge 7 ]]; then
 				download $XL_REPO_ROOT/rhel7/repodata/repomd.xml.key
 				rpm --import repomd.xml.key
 				rm -f repomd.xml.key
