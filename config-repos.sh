@@ -151,7 +151,7 @@ case "$package_manager" in
 		if [ "$QUIET" != "yes" ]; then echo "Install sofware-properties-common..."; fi
 		$package_manager install software-properties-common # for apt-add-repository
 
-		REPO_URI=ftp://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at/ubuntu
+		REPO_URI=https://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at/ubuntu
 
 		if [ "$QUIET" != "yes" ]; then echo "Download $REPO_URI/dists/$CODENAME/6976a827.gpg.key..."; fi
 		key="$(download2pipe $REPO_URI/dists/$CODENAME/6976a827.gpg.key)"
