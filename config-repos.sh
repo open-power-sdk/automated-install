@@ -7,7 +7,7 @@ Licensed under the Apache License, Version 2.0 (the “License”);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an “AS IS” BASIS,
@@ -119,7 +119,7 @@ case "$package_manager" in
 	yum*|zypper*|dnf*)
 		if ! rpm -q ibm-power-repo >/dev/null; then
 			REPORPM=ibm-power-repo-latest.noarch.rpm
-			download ftp://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/$REPORPM \
+			download https://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/$REPORPM \
 				|| { echo "Download of IBM Power Tools Repository configuration RPM failed."; exit 1; }
 			$package_manager install ./$REPORPM
 			\rm -f ./$REPORPM
@@ -170,7 +170,7 @@ case "$package_manager" in
 		if [ "$QUIET" != "yes" ]; then echo "Add repository \"deb$arch $REPO_URI $CODENAME $AT_RELEASES\""; fi
 		apt-add-repository "deb$arch $REPO_URI $CODENAME $AT_RELEASES"
 
-		REPO_URI=ftp://public.dhe.ibm.com/software/server/iplsdk/latest/packages/deb/repo
+		REPO_URI=https://public.dhe.ibm.com/software/server/iplsdk/latest/packages/deb/repo
 
 		if [ "$QUIET" != "yes" ]; then echo "Download $REPO_URI/dists/$CODENAME/B346CA20.gpg.key..."; fi
 		key="$(download2pipe $REPO_URI/dists/$CODENAME/B346CA20.gpg.key)"
@@ -200,7 +200,7 @@ esac
 # enable XL compiler repo
 arch=$(uname -m)
 if [ "$arch" = ppc64le ]; then
-	XL_REPO_ROOT=http://public.dhe.ibm.com/software/server/POWER/Linux/xl-compiler/eval/$arch
+	XL_REPO_ROOT=https://public.dhe.ibm.com/software/server/POWER/Linux/xl-compiler/eval/$arch
 	case "$ID" in
 		sles|sled)
 			# make sure it's 12!
