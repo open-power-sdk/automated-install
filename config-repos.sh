@@ -66,11 +66,23 @@ fi
 source /etc/os-release
 case "$ID" in
 	sles|sled)
-		package_manager="zypper $package_manager_quiet";;
+		package_manager="zypper $package_manager_quiet"
+		if [ "$PROCEED" = "yes" ]; then
+			package_manager="$package_manager --no-confirm"
+		fi
+		;;
 	rhel|centos)
-		package_manager="yum $package_manager_quiet";;
+		package_manager="yum $package_manager_quiet"
+		if [ "$PROCEED" = "yes" ]; then
+			package_manager="$package_manager --assumeyes"
+		fi
+		;;
 	fedora)
-		package_manager="dnf $package_manager_quiet";;
+		package_manager="dnf $package_manager_quiet"
+		if [ "$PROCEED" = "yes" ]; then
+			package_manager="$package_manager --assumeyes"
+		fi
+		;;
 	ubuntu|debian)
 		package_manager="apt-get"
 		if [ "$QUIET" = "yes" ]; then
@@ -124,7 +136,12 @@ case "$package_manager" in
 			$package_manager install ./$REPORPM
 			\rm -f ./$REPORPM
 
-			/opt/ibm/lop/configure
+			if [ "$PROCEED" = yes ]; then
+				# hack to configure without asking
+				(function more { cat $*; }; export -f more; echo y | /opt/ibm/lop/configure)
+			else
+				/opt/ibm/lop/configure
+			fi
 		fi
 		;;
 	apt-get*)
