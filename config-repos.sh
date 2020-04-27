@@ -118,7 +118,7 @@ function download2pipe {
 case "$package_manager" in
 	yum*|zypper*|dnf*)
 		if ! rpm -q ibm-power-repo >/dev/null; then
-			REPORPM=ibm-power-repo-latest.noarch.rpm
+			REPORPM=ibm-power-repo-3.0.0-19.noarch.rpm
 			download https://public.dhe.ibm.com/software/server/POWER/Linux/yum/download/$REPORPM \
 				|| { echo "Download of IBM Power Tools Repository configuration RPM failed."; exit 1; }
 			$package_manager install ./$REPORPM
